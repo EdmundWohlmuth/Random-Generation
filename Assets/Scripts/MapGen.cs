@@ -31,6 +31,7 @@ public class MapGen : MonoBehaviour
 
     void GenMesh()
     {
+        // create verticies
         verticies = new Vector3[(width +1) * (depth + 1)];
 
         int i = 0;
@@ -41,13 +42,37 @@ public class MapGen : MonoBehaviour
                 verticies[i] = new Vector3(x, 0, z);
                 i++;
             }
+
+        }
+
+        // create triangles
+        triangles = new int[width * depth * 6];
+        int tri = 0;
+
+        // BUG INVOLVING TWO TRIANGLE MESHES BEING CREATED ON THE UNDER SIDE OF THE TOP MESH
+        // ITS VERTICIES ARE THE TWO LEFT MOST AND TWO RIGHT MOST VERTICIES
+        for (int v = 0; v < width; v++)
+        {
+            triangles[tri + 0] = v + 0;
+            triangles[tri + 1] = v + width + 1;
+            triangles[tri + 2] = v + 1;
+            triangles[tri + 3] = v + 0;
+            triangles[tri + 4] = v + width;
+            triangles[tri + 5] = v + width + 1;
+
+            tri += 6;
         }
 
     }
 
     void UpdateMesh()
     {
+        mesh.Clear();
 
+        mesh.vertices = verticies;
+        mesh.triangles = triangles;
+
+        mesh.RecalculateNormals();
     }
 
     private void OnDrawGizmos()
