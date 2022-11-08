@@ -48,20 +48,27 @@ public class MapGen : MonoBehaviour
         // create triangles
         triangles = new int[width * depth * 6];
         int tri = 0;
+        int vert = 0;
 
         // BUG INVOLVING TWO TRIANGLE MESHES BEING CREATED ON THE UNDER SIDE OF THE TOP MESH
         // ITS VERTICIES ARE THE TWO LEFT MOST AND TWO RIGHT MOST VERTICIES
-        for (int v = 0; v < width; v++)
+        for (int h = 0; h < depth; h++)
         {
-            triangles[tri + 0] = v + 0;
-            triangles[tri + 1] = v + width + 1;
-            triangles[tri + 2] = v + 1;
-            triangles[tri + 3] = v + 0;
-            triangles[tri + 4] = v + width;
-            triangles[tri + 5] = v + width + 1;
+            for (int v = 0; v < width; v++)
+            {
+                triangles[tri + 0] = h + vert + 0;
+                triangles[tri + 1] = h + vert + width + 1;
+                triangles[tri + 2] = h + vert + 1;
+                
+                triangles[tri + 3] = h + vert + 0;
+                triangles[tri + 4] = h + vert + width;
+                triangles[tri + 5] = h + vert + width + 1;
 
-            tri += 6;
+                tri += 6;
+                vert++;
+            }
         }
+
 
     }
 
