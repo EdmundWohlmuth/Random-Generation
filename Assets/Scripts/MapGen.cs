@@ -5,7 +5,7 @@ using UnityEngine;
 public class MapGen : MonoBehaviour
 {
     Mesh mesh;
-    Vector3[] verticies;
+    Vector3[] vertices;
     int[] triangles;
 
     public int width;
@@ -23,60 +23,78 @@ public class MapGen : MonoBehaviour
         UpdateMesh();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     void GenMesh()
     {
-        // create verticies
-        verticies = new Vector3[(width +1) * (depth + 1)];
+        // -------------------------- create verticies --------------------------- \\
+        vertices = new Vector3[(width + 1) * (depth + 1)];
 
         int i = 0;
+
         for (int z = 0; z < depth; z++)
         {
             for (int x = 0; x < width; x++)
             {
-                verticies[i] = new Vector3(x, 0, z);
+                vertices[i] = new Vector3(x, 0, z);
+               // Debug.Log(i);
                 i++;
             }
 
         }
 
+        // --------------------------- create triangles ------------------------------- \\
+
         // create triangles
         triangles = new int[width * depth * 6];
-        int tri = 0;
-        int vert = 0;
+        int activeVertex = 0;
 
-        // BUG INVOLVING TWO TRIANGLE MESHES BEING CREATED ON THE UNDER SIDE OF THE TOP MESH
-        // ITS VERTICIES ARE THE TWO LEFT MOST AND TWO RIGHT MOST VERTICIES
-        for (int h = 0; h < depth; h++)
+        for (int x = 0; x < width * depth - 1; x++)
         {
-            for (int v = 0; v < width; v++)
-            {
-                triangles[tri + 0] = h + vert + 0;
-                triangles[tri + 1] = h + vert + width + 1;
-                triangles[tri + 2] = h + vert + 1;
-                
-                triangles[tri + 3] = h + vert + 0;
-                triangles[tri + 4] = h + vert + width;
-                triangles[tri + 5] = h + vert + width + 1;
+            // triangle 1
+            triangles[activeVertex] = x; // a
+            activeVertex++;
+            triangles[activeVertex] = x + width; // beecause this vertex is on another row we add the width to get it // b
+            activeVertex++;
+            triangles[activeVertex] = x + width + 1; // c
+            activeVertex++;
 
-                tri += 6;
-                vert++;
-            }
+            // triangle 2
+            triangles[activeVertex] = x;
+            activeVertex++;
+            triangles[activeVertex] = x + width + 1; // d
+            activeVertex++;
+            triangles[activeVertex] = x + 1;
+            activeVertex++;
+
+            // a = x + ((width + 1) * z)
+            // b = a + 1
+            // c = a + width + 1
+            // d = b = width + 1
+
+            // vertex loop breaks at the very end causing the next vertex to be all the way at "0"
+            // need to set up a way to prevent the far edges from creating a triangle
         }
 
+        //TEST              Good ol' Fashioned hard-coding
+/*        vertices = new Vector3[]
+        {
+                    new Vector3 (0,0,0),
+                    new Vector3 (0,0,1),
+                    new Vector3 (1,0,0),
+                    new Vector3 (1,0,1)
+        };
 
+        triangles = new int[]
+        {
+            0, 1, 2,
+            1, 3, 2
+        };*/
     }
 
     void UpdateMesh()
     {
         mesh.Clear();
 
-        mesh.vertices = verticies;
+        mesh.vertices = vertices;
         mesh.triangles = triangles;
 
         mesh.RecalculateNormals();
@@ -84,9 +102,9 @@ public class MapGen : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        for (int i = 0; i < verticies.Length; i++)
+        for (int i = 0; i < vertices.Length; i++)
         {
-            Gizmos.DrawSphere(verticies[i], 0.1f);
+            Gizmos.DrawSphere(vertices[i], 0.1f);
         }
         
     }
