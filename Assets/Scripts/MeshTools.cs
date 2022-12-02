@@ -26,4 +26,9 @@ public class MeshTools : MonoBehaviour
         mapGen.amplitude = amplitude.value;
         mapGen.frequency = frequency.value;
     }
+
+    public void Exit()
+    {
+        Application.Quit(0);
+    }
 }
