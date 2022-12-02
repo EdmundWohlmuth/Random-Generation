@@ -8,8 +8,15 @@ public class MapGen : MonoBehaviour
     Vector3[] vertices;
     int[] triangles;
 
+    [Header("World Size")]
     public int width;
     public int depth;
+
+    [Header("Perlin Noise")]
+    [Range(0f, 10f)]
+    public float amplitude;
+    [Range(0f, 1f)]
+    public float frequency;
 
     // Start is called before the first frame update
     void Start()
@@ -24,6 +31,10 @@ public class MapGen : MonoBehaviour
     private void Update()
     {
         UpdateMesh();
+        if (Input.GetKey(KeyCode.Space))
+        {
+            NewMesh();
+        }
     }
 
     IEnumerator GenMesh()
@@ -31,13 +42,14 @@ public class MapGen : MonoBehaviour
         // -------------------------- create verticies --------------------------- \\
         vertices = new Vector3[(width + 1) * (depth + 1)];
 
-        int i = 0;
+        int i = 0;   
 
         for (int z = 0; z < depth; z++)
         {
             for (int x = 0; x < width; x++)
             {
-                vertices[i] = new Vector3(x, 0, z);
+                float y = Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude;
+                vertices[i] = new Vector3(x, y, z);
                // Debug.Log(i);
                 i++;
             }
@@ -67,38 +79,28 @@ public class MapGen : MonoBehaviour
                 // triangle 1
 
                 triangles[activeVertex] = x; // a
-                Debug.Log(activeVertex);
                 activeVertex++;
 
                 triangles[activeVertex] = x + width; // beecause this vertex is on another row we add the width to get it // b
-                Debug.Log(activeVertex);
                 activeVertex++;
 
                 triangles[activeVertex] = x + width + 1; // c
-                Debug.Log(activeVertex);
-
                 activeVertex++;
 
                 // triangle 2
 
                 triangles[activeVertex] = x;
-                Debug.Log(activeVertex);
                 activeVertex++;
-
 
                 triangles[activeVertex] = x + width + 1; // d
-                Debug.Log(activeVertex);
                 activeVertex++;
 
-
                 triangles[activeVertex] = x + 1;
-                Debug.Log(activeVertex);
                 activeVertex++;
             }
 
 
-            yield return new WaitForSeconds(0.1f);
-
+            yield return new WaitForSeconds(0.05f);
         }
 
         /*        for (int z = 0; z < depth; z++)
@@ -148,12 +150,6 @@ public class MapGen : MonoBehaviour
                 };*/
     }
 
-    bool IsEdge(int vertex)
-    {
-        if (vertex % width == 0) return true;
-        else return false;
-    }
-
     void UpdateMesh()
     {
         mesh.Clear();
@@ -162,6 +158,12 @@ public class MapGen : MonoBehaviour
         mesh.triangles = triangles;
 
         mesh.RecalculateNormals();
+    }
+
+    void NewMesh()
+    {
+        mesh.Clear();
+        StartCoroutine(GenMesh());
     }
 
     private void OnDrawGizmos()
