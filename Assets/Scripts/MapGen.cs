@@ -48,8 +48,8 @@ public class MapGen : MonoBehaviour
         {
             for (int x = 0; x < width; x++)
             {
-                float y = Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude;
-                vertices[i] = new Vector3(x, y, z);
+                float y = Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude; // PerlinNoise map - could modify x and y
+                vertices[i] = new Vector3(x, y, z);                                    // for diffrent maps
                // Debug.Log(i);
                 i++;
             }
@@ -67,7 +67,7 @@ public class MapGen : MonoBehaviour
             
             if (activeVertex == lineNum)
             {
-                lineNum += 66; // hardcoded for 11 * 11
+                lineNum += 66; // hardcoded for 11 * 11 - Theoretically it can be width * 6 plus or minus something
                 activeVertex += 6;
             }
             else if (activeVertex == (width * depth * 6) - 66)
@@ -81,7 +81,7 @@ public class MapGen : MonoBehaviour
                 triangles[activeVertex] = x; // a
                 activeVertex++;
 
-                triangles[activeVertex] = x + width; // beecause this vertex is on another row we add the width to get it // b
+                triangles[activeVertex] = x + width; // because this vertex is on another row we add the width to get it // b
                 activeVertex++;
 
                 triangles[activeVertex] = x + width + 1; // c
