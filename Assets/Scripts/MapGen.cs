@@ -2,6 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// TO DO:
+
+// - Looping through multiple meshes to create "chunks"
+// - sync the perlin noise between "chunks"
+// - Use subscenes for preformance
+
 public class MapGen : MonoBehaviour
 {
     Mesh mesh;
@@ -24,8 +30,7 @@ public class MapGen : MonoBehaviour
         mesh = new Mesh();
         mesh = GetComponent<MeshFilter>().mesh;
 
-        StartCoroutine( GenMesh() );
-        
+        GenMesh();    
     }
 
     private void Update()
@@ -37,7 +42,14 @@ public class MapGen : MonoBehaviour
         }
     }
 
-    IEnumerator GenMesh()
+    float Spectral(float x, float z, float frequency, float amplitude)
+    {
+        float result = 0;
+        result += Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude;// w/ variation
+        return result;
+    }
+
+    void GenMesh()
     {
         // -------------------------- create verticies --------------------------- \\
         vertices = new Vector3[(width + 1) * (depth + 1)];
@@ -48,7 +60,7 @@ public class MapGen : MonoBehaviour
         {
             for (int x = 0; x < width; x++)
             {
-                float y = Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude; // PerlinNoise map - could modify x and y
+                float y = Spectral(x, z, frequency, amplitude); // PerlinNoise map - could modify x and y
                 vertices[i] = new Vector3(x, y, z);                                    // for diffrent maps
                // Debug.Log(i);
                 i++;
@@ -61,16 +73,16 @@ public class MapGen : MonoBehaviour
         // create triangles
         triangles = new int[width * depth * 6];
         int activeVertex = 0;
-        int lineNum = 60;
+        int lineNum = (width * 6) - 6;
         for (int x = 0; x < width * depth - 1; x++)
         {
             
             if (activeVertex == lineNum)
             {
-                lineNum += 66; // hardcoded for 11 * 11 - Theoretically it can be width * 6 plus or minus something
+                lineNum += width * 6; // hardcoded for 11 * 11 - Theoretically it can be width * 6 plus or minus something
                 activeVertex += 6;
             }
-            else if (activeVertex == (width * depth * 6) - 66)
+            else if (activeVertex == (width * depth * 6) - width * 6)
             {
                 break;
             }
@@ -98,9 +110,6 @@ public class MapGen : MonoBehaviour
                 triangles[activeVertex] = x + 1;
                 activeVertex++;
             }
-
-
-            yield return new WaitForSeconds(0.05f);
         }
 
         /*        for (int z = 0; z < depth; z++)
@@ -163,7 +172,7 @@ public class MapGen : MonoBehaviour
     void NewMesh()
     {
         mesh.Clear();
-        StartCoroutine(GenMesh());
+        GenMesh();
     }
 
     private void OnDrawGizmos()
