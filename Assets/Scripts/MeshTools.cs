@@ -9,15 +9,27 @@ public class MeshTools : MonoBehaviour
 
     public Slider amplitude;
     public Slider frequency;
+    public Slider waterLevel;
+    public Slider XCoord;
+    public Slider ZCoord;
 
     // Start is called before the first frame update
     void Start()
     {
-        amplitude.maxValue = 10;
-        frequency.maxValue = 1;
+        amplitude.maxValue = 20;
+        frequency.maxValue = 0.5f;
+        waterLevel.maxValue = 20;
+
+        XCoord.maxValue = 200f;
+        XCoord.minValue = -200f;
+        ZCoord.maxValue = 200f;
+        ZCoord.minValue = -200f;
 
         amplitude.value = mapGen.amplitude;
         frequency.value = mapGen.frequency;
+        waterLevel.value = mapGen.waterLevel;
+        XCoord.value = mapGen.offsetX;
+        ZCoord.value = mapGen.offsetZ;
     }
 
     // Update is called once per frame
@@ -25,6 +37,9 @@ public class MeshTools : MonoBehaviour
     {
         mapGen.amplitude = amplitude.value;
         mapGen.frequency = frequency.value;
+        mapGen.waterLevel = waterLevel.value;
+        mapGen.offsetX = XCoord.value;
+        mapGen.offsetZ = ZCoord.value;
     }
 
     public void Exit()

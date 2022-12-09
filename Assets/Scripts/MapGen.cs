@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TO DO:
+// WISH LIST:
 
+// - Dynamic texture / material based on height
+// - Water & water level
 // - Looping through multiple meshes to create "chunks"
 // - sync the perlin noise between "chunks"
 // - Use subscenes for preformance
@@ -19,10 +21,23 @@ public class MapGen : MonoBehaviour
     public int depth;
 
     [Header("Perlin Noise")]
-    [Range(0f, 10f)]
+    [Range(0f, 20f)]
     public float amplitude;
-    [Range(0f, 1f)]
+    [Range(0f, 0.5f)]
     public float frequency;
+
+    [Header("Seed variables")]
+    [Range(-25f, 25f)]
+    public float offsetX;
+    public float offsetZ;
+    [Range(1, 5)]
+    public int smoothing;
+
+    [Header("Water variables")]
+    [Range(0f, 20f)]
+    public float waterLevel;
+    public GameObject water;
+    public Material waterMat;
 
     // Start is called before the first frame update
     void Start()
@@ -30,23 +45,36 @@ public class MapGen : MonoBehaviour
         mesh = new Mesh();
         mesh = GetComponent<MeshFilter>().mesh;
 
+        water.transform.localScale = new Vector3(5, 1, 5);
         GenMesh();    
     }
 
     private void Update()
     {
+        WaterMesh();
         UpdateMesh();
         if (Input.GetKey(KeyCode.Space))
         {
             NewMesh();
-        }
+        }      
+    }
+
+    float PerlinNoise(float x, float y) // -1.0...1.0
+    {
+        return -Mathf.Abs(Mathf.PerlinNoise(x, y * 2f) - 1) * amplitude; // doubles amplitude
     }
 
     float Spectral(float x, float z, float frequency, float amplitude)
     {
         float result = 0;
         result += Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude;// w/ variation
+        result += Mathf.PerlinNoise(x * frequency * 2, z * frequency * 2) * amplitude / 2;
+        result += Mathf.PerlinNoise(x * frequency * 3, z * frequency * 3) * amplitude / 3;
+        //result += Mathf.PerlinNoise(x * frequency * 8, z * frequency * 8) * amplitude / 8;
+        //result += Mathf.PerlinNoise(x * frequency * 2, z * frequency * 2) * amplitude / 16;
         return result;
+        
+        // take abs then invert -- abs aplies turbulence (-abs PerlinNoise)
     }
 
     void GenMesh()
@@ -60,7 +88,7 @@ public class MapGen : MonoBehaviour
         {
             for (int x = 0; x < width; x++)
             {
-                float y = Spectral(x, z, frequency, amplitude); // PerlinNoise map - could modify x and y
+                float y = Spectral(x + offsetX, z + offsetZ, frequency, amplitude); // PerlinNoise map - could modify x and y
                 vertices[i] = new Vector3(x, y, z);                                    // for diffrent maps
                // Debug.Log(i);
                 i++;
@@ -175,6 +203,12 @@ public class MapGen : MonoBehaviour
         GenMesh();
     }
 
+    void WaterMesh()
+    {
+        water.transform.position = new Vector3(width / 2, waterLevel, depth / 2);
+    }
+
+/*
     private void OnDrawGizmos()
     {
         for (int i = 0; i < vertices.Length; i++)
@@ -182,5 +216,5 @@ public class MapGen : MonoBehaviour
             Gizmos.DrawSphere(vertices[i], 0.1f);
         }
         
-    }
+    }*/
 }
